@@ -5,5 +5,8 @@ __pycache__/
 # Virtual environment
 .venv/
 
+# Environment
+.env
+
 # Local project files
 _local/
