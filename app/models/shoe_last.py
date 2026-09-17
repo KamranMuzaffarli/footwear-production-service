@@ -60,6 +60,11 @@ class ShoeLast(Base):
         back_populates="shoe_last",
     )
 
+    shoe_models: Mapped[list[ShoeModel]] = relationship(
+    "ShoeModel",
+    back_populates="shoe_last",
+    )
+
 
 class ShoeLastSize(Base):
     __tablename__ = "shoe_last_sizes"
