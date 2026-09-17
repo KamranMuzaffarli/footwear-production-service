@@ -17,6 +17,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 from app.models.shoe_last import ShoeLast
+from app.models.construction import ShoeConstructionMethod
 
 
 class ShoeModel(Base):
@@ -123,5 +124,9 @@ class ShoeModelClass(Base):
     )
 
     shoe_model: Mapped[ShoeModel] = relationship(
+        back_populates="model_classes",
+    )
+
+    construction_method: Mapped[ShoeConstructionMethod] = relationship(
         back_populates="model_classes",
     )
