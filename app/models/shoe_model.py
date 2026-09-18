@@ -130,3 +130,8 @@ class ShoeModelClass(Base):
     construction_method: Mapped[ShoeConstructionMethod] = relationship(
         back_populates="model_classes",
     )
+
+    compositions: Mapped[list["ShoeModelClassMaterial"]] = relationship(
+        "ShoeModelClassMaterial",
+        back_populates="shoe_model_class",
+    )

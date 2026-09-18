@@ -328,7 +328,9 @@ class ShoeModelClassMaterial(Base):
         server_default=text("CURRENT_TIMESTAMP"),
     )
 
-    shoe_model_class: Mapped[ShoeModelClass] = relationship()
+    shoe_model_class: Mapped[ShoeModelClass] = relationship(
+    back_populates="compositions",
+    )
     material: Mapped[Material] = relationship(
         back_populates="compositions",
     )
