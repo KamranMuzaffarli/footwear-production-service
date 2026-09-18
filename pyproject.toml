@@ -6,6 +6,7 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "pydantic-settings",
+    "pydantic",
     "sqlalchemy>=2.0,<3.0",
     "asyncpg",
 ]
