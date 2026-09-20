@@ -3,12 +3,14 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 import app.models
+from app.api.exception_handlers import register_exception_handlers
 from app.api.router import api_router
 from app.db.session import engine
 
 
 app = FastAPI()
 
+register_exception_handlers(app)
 app.include_router(api_router, prefix="/api/v1")
 
 
