@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ShoeLastSummaryRead(BaseModel):
@@ -48,3 +48,39 @@ class ShoeModelClassRead(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+
+
+class ShoeModelCreate(BaseModel):
+    shoe_last_id: int
+    model_code: str = Field(max_length=60)
+    model_name: str = Field(max_length=100)
+    footwear_category: str = Field(max_length=80)
+    footwear_type: str | None = Field(default=None, max_length=80)
+    target_group: str = Field(max_length=40)
+    description: str | None = None
+    is_active: bool = True
+
+
+class ShoeModelUpdate(BaseModel):
+    shoe_last_id: int | None = None
+    model_code: str | None = Field(default=None, max_length=60)
+    model_name: str | None = Field(default=None, max_length=100)
+    footwear_category: str | None = Field(default=None, max_length=80)
+    footwear_type: str | None = Field(default=None, max_length=80)
+    target_group: str | None = Field(default=None, max_length=40)
+    description: str | None = None
+    is_active: bool | None = None
+
+    @field_validator(
+        "shoe_last_id",
+        "model_code",
+        "model_name",
+        "footwear_category",
+        "target_group",
+        "is_active",
+    )
+    @classmethod
+    def reject_null_for_non_nullable_fields(cls, value):
+        if value is None:
+            raise ValueError("Field may not be null")
+        return value

@@ -12,8 +12,15 @@ from app.repositories.shoe_model import (
 )
 from app.schemas.shoe_model import (
     ShoeModelClassRead,
+    ShoeModelCreate,
     ShoeModelDetailRead,
     ShoeModelRead,
+    ShoeModelUpdate,
+)
+
+from app.services.shoe_model import (
+    create_shoe_model as service_create_shoe_model,
+    update_shoe_model as service_update_shoe_model,
 )
 
 
@@ -78,4 +85,35 @@ async def read_shoe_model_classes(
     return await list_shoe_model_classes(
         session,
         shoe_model_id,
+    )
+
+
+@router.post(
+    "",
+    response_model=ShoeModelRead,
+    status_code=201,
+)
+async def create_model(
+    data: ShoeModelCreate,
+    session: DbSession,
+):
+    return await service_create_shoe_model(
+        session,
+        data,
+    )
+
+
+@router.patch(
+    "/{shoe_model_id}",
+    response_model=ShoeModelRead,
+)
+async def update_model(
+    shoe_model_id: int,
+    data: ShoeModelUpdate,
+    session: DbSession,
+):
+    return await service_update_shoe_model(
+        session,
+        shoe_model_id,
+        data,
     )

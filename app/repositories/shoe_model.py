@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.models.shoe_last import ShoeLast
 from app.models.shoe_model import ShoeModel, ShoeModelClass
 
 
@@ -109,3 +110,46 @@ async def get_shoe_model_class(
     result = await session.execute(statement)
 
     return result.scalar_one_or_none()
+
+
+async def get_shoe_last(
+    session: AsyncSession,
+    shoe_last_id: int,
+) -> ShoeLast | None:
+    return await session.get(ShoeLast, shoe_last_id)
+
+
+async def get_shoe_model_by_code(
+    session: AsyncSession,
+    model_code: str,
+) -> ShoeModel | None:
+    statement = select(ShoeModel).where(
+        ShoeModel.model_code == model_code
+    )
+    result = await session.execute(statement)
+    return result.scalar_one_or_none()
+
+
+async def create_shoe_model(
+    session: AsyncSession,
+    data: dict,
+) -> ShoeModel:
+    shoe_model = ShoeModel(**data)
+    session.add(shoe_model)
+
+    await session.flush()
+
+    return shoe_model
+
+
+async def update_shoe_model(
+    session: AsyncSession,
+    shoe_model: ShoeModel,
+    data: dict,
+) -> ShoeModel:
+    for field, value in data.items():
+        setattr(shoe_model, field, value)
+
+    await session.flush()
+
+    return shoe_model
