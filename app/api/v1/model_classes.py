@@ -5,7 +5,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_db_session
 from app.repositories.shoe_model import get_shoe_model_class
-from app.schemas.shoe_model import ShoeModelClassRead
+
+from app.schemas.shoe_model import (
+    ShoeModelClassRead,
+    ShoeModelClassUpdate,
+)
+
+from app.services.model_class import (
+    update_model_class as service_update_model_class,
+)
 
 
 router = APIRouter(
@@ -36,3 +44,19 @@ async def read_shoe_model_class(
         )
 
     return model_class
+
+
+@router.patch(
+    "/{shoe_model_class_id}",
+    response_model=ShoeModelClassRead,
+)
+async def update_model_class(
+    shoe_model_class_id: int,
+    data: ShoeModelClassUpdate,
+    session: DbSession,
+):
+    return await service_update_model_class(
+        session,
+        shoe_model_class_id,
+        data,
+    )

@@ -84,3 +84,34 @@ class ShoeModelUpdate(BaseModel):
         if value is None:
             raise ValueError("Field may not be null")
         return value
+
+
+class ShoeModelClassCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    class_code: str = Field(max_length=40)
+    class_name: str = Field(max_length=80)
+    construction_method_id: int
+    quality_level: str | None = Field(default=None, max_length=40)
+    warranty_months: int | None = None
+    description: str | None = None
+    is_active: bool = True
+
+
+class ShoeModelClassUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    construction_method_id: int | None = None
+    quality_level: str | None = Field(default=None, max_length=40)
+    warranty_months: int | None = None
+    is_active: bool | None = None
+
+    @field_validator(
+        "construction_method_id",
+        "is_active",
+    )
+    @classmethod
+    def reject_null_for_non_nullable_fields(cls, value):
+        if value is None:
+            raise ValueError("Field may not be null")
+        return value

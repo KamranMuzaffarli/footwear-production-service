@@ -11,13 +11,16 @@ from app.repositories.shoe_model import (
     shoe_model_exists,
 )
 from app.schemas.shoe_model import (
+    ShoeModelClassCreate,
     ShoeModelClassRead,
     ShoeModelCreate,
     ShoeModelDetailRead,
     ShoeModelRead,
     ShoeModelUpdate,
 )
-
+from app.services.model_class import (
+    create_model_class as service_create_model_class,
+)
 from app.services.shoe_model import (
     create_shoe_model as service_create_shoe_model,
     update_shoe_model as service_update_shoe_model,
@@ -52,6 +55,21 @@ async def read_shoe_models(
     )
 
 
+@router.post(
+    "",
+    response_model=ShoeModelRead,
+    status_code=201,
+)
+async def create_model(
+    data: ShoeModelCreate,
+    session: DbSession,
+):
+    return await service_create_shoe_model(
+        session,
+        data,
+    )
+
+
 @router.get("/{shoe_model_id}", response_model=ShoeModelDetailRead)
 async def read_shoe_model(
     shoe_model_id: int,
@@ -66,6 +84,22 @@ async def read_shoe_model(
         )
 
     return shoe_model
+
+
+@router.patch(
+    "/{shoe_model_id}",
+    response_model=ShoeModelRead,
+)
+async def update_model(
+    shoe_model_id: int,
+    data: ShoeModelUpdate,
+    session: DbSession,
+):
+    return await service_update_shoe_model(
+        session,
+        shoe_model_id,
+        data,
+    )
 
 
 @router.get(
@@ -89,30 +123,16 @@ async def read_shoe_model_classes(
 
 
 @router.post(
-    "",
-    response_model=ShoeModelRead,
+    "/{shoe_model_id}/classes",
+    response_model=ShoeModelClassRead,
     status_code=201,
 )
-async def create_model(
-    data: ShoeModelCreate,
-    session: DbSession,
-):
-    return await service_create_shoe_model(
-        session,
-        data,
-    )
-
-
-@router.patch(
-    "/{shoe_model_id}",
-    response_model=ShoeModelRead,
-)
-async def update_model(
+async def create_model_class(
     shoe_model_id: int,
-    data: ShoeModelUpdate,
+    data: ShoeModelClassCreate,
     session: DbSession,
 ):
-    return await service_update_shoe_model(
+    return await service_create_model_class(
         session,
         shoe_model_id,
         data,

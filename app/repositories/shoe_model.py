@@ -4,6 +4,7 @@ from sqlalchemy.orm import selectinload
 
 from app.models.shoe_last import ShoeLast
 from app.models.shoe_model import ShoeModel, ShoeModelClass
+from app.models.construction import ShoeConstructionMethod
 
 
 async def list_shoe_models(
@@ -153,3 +154,59 @@ async def update_shoe_model(
     await session.flush()
 
     return shoe_model
+
+
+async def get_construction_method(
+    session: AsyncSession,
+    construction_method_id: int,
+) -> ShoeConstructionMethod | None:
+    return await session.get(
+        ShoeConstructionMethod,
+        construction_method_id,
+    )
+
+
+async def get_shoe_model_class_by_code(
+    session: AsyncSession,
+    shoe_model_id: int,
+    class_code: str,
+) -> ShoeModelClass | None:
+    statement = select(ShoeModelClass).where(
+        ShoeModelClass.shoe_model_id == shoe_model_id,
+        ShoeModelClass.class_code == class_code,
+    )
+
+    result = await session.execute(statement)
+
+    return result.scalar_one_or_none()
+
+
+async def create_shoe_model_class(
+    session: AsyncSession,
+    *,
+    shoe_model_id: int,
+    data: dict,
+) -> ShoeModelClass:
+    shoe_model_class = ShoeModelClass(
+        shoe_model_id=shoe_model_id,
+        **data,
+    )
+
+    session.add(shoe_model_class)
+
+    await session.flush()
+
+    return shoe_model_class
+
+
+async def update_shoe_model_class(
+    session: AsyncSession,
+    shoe_model_class: ShoeModelClass,
+    data: dict,
+) -> ShoeModelClass:
+    for field, value in data.items():
+        setattr(shoe_model_class, field, value)
+
+    await session.flush()
+
+    return shoe_model_class
