@@ -7,11 +7,13 @@ from app.api.dependencies import get_db_session
 from app.repositories.shoe_model import get_shoe_model_class
 
 from app.schemas.shoe_model import (
+    ShoeModelClassClone,
     ShoeModelClassRead,
     ShoeModelClassUpdate,
 )
 
 from app.services.model_class import (
+    clone_model_class as service_clone_model_class,
     update_model_class as service_update_model_class,
 )
 
@@ -56,6 +58,23 @@ async def update_model_class(
     session: DbSession,
 ):
     return await service_update_model_class(
+        session,
+        shoe_model_class_id,
+        data,
+    )
+
+
+@router.post(
+    "/{shoe_model_class_id}/clone",
+    response_model=ShoeModelClassRead,
+    status_code=201,
+)
+async def clone_model_class(
+    shoe_model_class_id: int,
+    data: ShoeModelClassClone,
+    session: DbSession,
+):
+    return await service_clone_model_class(
         session,
         shoe_model_class_id,
         data,

@@ -16,8 +16,14 @@ from app.repositories.shoe_model import (
     update_shoe_model_class as repository_update_shoe_model_class,
 )
 from app.schemas.shoe_model import (
+    ShoeModelClassClone,
     ShoeModelClassCreate,
     ShoeModelClassUpdate,
+)
+
+from app.repositories.production_composition import (
+    create_composition as repository_create_composition,
+    list_active_compositions,
 )
 
 
@@ -148,3 +154,83 @@ async def update_model_class(
     await session.refresh(shoe_model_class)
 
     return shoe_model_class
+
+
+async def clone_model_class(
+    session: AsyncSession,
+    shoe_model_class_id: int,
+    data: ShoeModelClassClone,
+) -> ShoeModelClass:
+    source = await get_shoe_model_class(
+        session,
+        shoe_model_class_id,
+    )
+
+    if source is None:
+        raise EntityNotFoundError("Model Class not found")
+
+    await _validate_class_code(
+        session,
+        source.shoe_model_id,
+        data.class_code,
+    )
+
+    source_compositions = await list_active_compositions(
+        session,
+        shoe_model_class_id,
+    )
+
+    class_data = {
+        "construction_method_id": source.construction_method_id,
+        "class_code": data.class_code,
+        "class_name": data.class_name,
+        "quality_level": source.quality_level,
+        "warranty_months": source.warranty_months,
+        "description": source.description,
+        "is_active": source.is_active,
+    }
+
+    try:
+        cloned_class = await repository_create_shoe_model_class(
+            session,
+            shoe_model_id=source.shoe_model_id,
+            data=class_data,
+        )
+
+        for source_composition in source_compositions:
+            composition_data = {
+                "material_id": source_composition.material_id,
+                "material_usage_role_id":
+                    source_composition.material_usage_role_id,
+                "consumption_quantity":
+                    source_composition.consumption_quantity,
+                "consumption_unit":
+                    source_composition.consumption_unit,
+                "is_required": source_composition.is_required,
+                "description": source_composition.description,
+                "is_active": True,
+            }
+
+            await repository_create_composition(
+                session,
+                shoe_model_class_id=(
+                    cloned_class.shoe_model_class_id
+                ),
+                data=composition_data,
+            )
+
+        await session.commit()
+
+    except IntegrityError as exc:
+        await session.rollback()
+        raise ConflictError(
+            "Model Class clone conflicts with existing data"
+        ) from exc
+
+    except Exception:
+        await session.rollback()
+        raise
+
+    await session.refresh(cloned_class)
+
+    return cloned_class

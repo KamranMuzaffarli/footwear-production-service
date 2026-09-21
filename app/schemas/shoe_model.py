@@ -98,6 +98,13 @@ class ShoeModelClassCreate(BaseModel):
     is_active: bool = True
 
 
+class ShoeModelClassClone(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    class_code: str = Field(max_length=40)
+    class_name: str = Field(max_length=80)
+
+
 class ShoeModelClassUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
