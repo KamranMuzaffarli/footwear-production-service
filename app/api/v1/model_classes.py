@@ -17,6 +17,14 @@ from app.services.model_class import (
     update_model_class as service_update_model_class,
 )
 
+from app.schemas.production_specification import (
+    ProductionSpecificationRead,
+)
+
+from app.services.production_specification import (
+    get_production_specification,
+)
+
 
 router = APIRouter(
     prefix="/model-classes",
@@ -78,4 +86,18 @@ async def clone_model_class(
         session,
         shoe_model_class_id,
         data,
+    )
+
+
+@router.get(
+    "/{shoe_model_class_id}/specification",
+    response_model=ProductionSpecificationRead,
+)
+async def read_production_specification(
+    shoe_model_class_id: int,
+    session: DbSession,
+):
+    return await get_production_specification(
+        session,
+        shoe_model_class_id,
     )
