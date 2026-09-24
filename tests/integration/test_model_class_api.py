@@ -22,17 +22,10 @@ async def test_model_class_create_get_and_partial_update(
     test_shoe_model: dict,
     active_construction_method: dict,
 ) -> None:
-    payload = make_class_payload(
-        active_construction_method[
-            "construction_method_id"
-        ]
-    )
+    payload = make_class_payload(active_construction_method["construction_method_id"])
 
     create_response = await client.post(
-        (
-            f"/api/v1/models/"
-            f"{test_shoe_model['shoe_model_id']}/classes"
-        ),
+        (f"/api/v1/models/{test_shoe_model['shoe_model_id']}/classes"),
         json=payload,
     )
 
@@ -43,31 +36,17 @@ async def test_model_class_create_get_and_partial_update(
 
     assert created["class_code"] == payload["class_code"]
     assert created["class_name"] == payload["class_name"]
-    assert (
-        created["shoe_model_id"]
-        == test_shoe_model["shoe_model_id"]
-    )
-    assert (
-        created["construction_method_id"]
-        == payload["construction_method_id"]
-    )
+    assert created["shoe_model_id"] == test_shoe_model["shoe_model_id"]
+    assert created["construction_method_id"] == payload["construction_method_id"]
 
-    get_response = await client.get(
-        f"/api/v1/model-classes/{class_id}"
-    )
+    get_response = await client.get(f"/api/v1/model-classes/{class_id}")
 
     assert get_response.status_code == 200
 
     persisted = get_response.json()
 
-    assert (
-        persisted["shoe_model_class_id"]
-        == class_id
-    )
-    assert (
-        persisted["class_code"]
-        == payload["class_code"]
-    )
+    assert persisted["shoe_model_class_id"] == class_id
+    assert persisted["class_code"] == payload["class_code"]
 
     patch_response = await client.patch(
         f"/api/v1/model-classes/{class_id}",
@@ -86,18 +65,10 @@ async def test_model_class_create_get_and_partial_update(
 
     assert updated["class_code"] == payload["class_code"]
     assert updated["class_name"] == payload["class_name"]
-    assert (
-        updated["construction_method_id"]
-        == payload["construction_method_id"]
-    )
-    assert (
-        updated["shoe_model_id"]
-        == test_shoe_model["shoe_model_id"]
-    )
+    assert updated["construction_method_id"] == payload["construction_method_id"]
+    assert updated["shoe_model_id"] == test_shoe_model["shoe_model_id"]
 
-    final_response = await client.get(
-        f"/api/v1/model-classes/{class_id}"
-    )
+    final_response = await client.get(f"/api/v1/model-classes/{class_id}")
 
     assert final_response.status_code == 200
 
@@ -113,16 +84,11 @@ async def test_model_class_duplicate_code_returns_409(
     active_construction_method: dict,
 ) -> None:
     payload = make_class_payload(
-        active_construction_method[
-            "construction_method_id"
-        ],
+        active_construction_method["construction_method_id"],
         class_code="TEST_DUPLICATE_CLASS",
     )
 
-    path = (
-        f"/api/v1/models/"
-        f"{test_shoe_model['shoe_model_id']}/classes"
-    )
+    path = f"/api/v1/models/{test_shoe_model['shoe_model_id']}/classes"
 
     first_response = await client.post(
         path,
@@ -152,9 +118,7 @@ async def test_model_class_missing_parent_model_returns_404(
     response = await client.post(
         "/api/v1/models/999999/classes",
         json=make_class_payload(
-            active_construction_method[
-                "construction_method_id"
-            ],
+            active_construction_method["construction_method_id"],
             class_code="TEST_MISSING_PARENT",
         ),
     )
@@ -172,10 +136,7 @@ async def test_model_class_missing_construction_method_returns_404(
     test_shoe_model: dict,
 ) -> None:
     response = await client.post(
-        (
-            f"/api/v1/models/"
-            f"{test_shoe_model['shoe_model_id']}/classes"
-        ),
+        (f"/api/v1/models/{test_shoe_model['shoe_model_id']}/classes"),
         json=make_class_payload(
             999999,
             class_code="TEST_MISSING_METHOD",
@@ -195,10 +156,7 @@ async def test_model_class_patch_forbidden_field_returns_422(
     test_model_class: dict,
 ) -> None:
     response = await client.patch(
-        (
-            f"/api/v1/model-classes/"
-            f"{test_model_class['shoe_model_class_id']}"
-        ),
+        (f"/api/v1/model-classes/{test_model_class['shoe_model_class_id']}"),
         json={
             "class_name": "Forbidden Change",
         },

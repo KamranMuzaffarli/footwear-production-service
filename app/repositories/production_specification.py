@@ -19,52 +19,30 @@ async def get_model_class_specification(
 ) -> ShoeModelClass | None:
     statement = (
         select(ShoeModelClass)
-        .where(
-            ShoeModelClass.shoe_model_class_id
-            == shoe_model_class_id
-        )
+        .where(ShoeModelClass.shoe_model_class_id == shoe_model_class_id)
         .options(
-            selectinload(
-                ShoeModelClass.shoe_model
-            ).selectinload(
-                ShoeModel.shoe_last
-            ),
-            selectinload(
-                ShoeModelClass.construction_method
-            ),
+            selectinload(ShoeModelClass.shoe_model).selectinload(ShoeModel.shoe_last),
+            selectinload(ShoeModelClass.construction_method),
             selectinload(
                 ShoeModelClass.compositions.and_(
                     ShoeModelClassMaterial.is_active.is_(True)
                 )
             )
-            .selectinload(
-                ShoeModelClassMaterial.material
-            )
-            .selectinload(
-                Material.category
-            ),
+            .selectinload(ShoeModelClassMaterial.material)
+            .selectinload(Material.category),
             selectinload(
                 ShoeModelClass.compositions.and_(
                     ShoeModelClassMaterial.is_active.is_(True)
                 )
             )
-            .selectinload(
-                ShoeModelClassMaterial.material
-            )
-            .selectinload(
-                Material.attribute_values
-            )
-            .selectinload(
-                MaterialAttributeValue.attribute
-            ),
+            .selectinload(ShoeModelClassMaterial.material)
+            .selectinload(Material.attribute_values)
+            .selectinload(MaterialAttributeValue.attribute),
             selectinload(
                 ShoeModelClass.compositions.and_(
                     ShoeModelClassMaterial.is_active.is_(True)
                 )
-            )
-            .selectinload(
-                ShoeModelClassMaterial.usage_role
-            ),
+            ).selectinload(ShoeModelClassMaterial.usage_role),
         )
     )
 

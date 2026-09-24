@@ -7,7 +7,6 @@ from app.api.dependencies import get_db_session
 from app.repositories.shoe_last import get_shoe_last, list_shoe_lasts
 from app.schemas.shoe_last import ShoeLastDetailRead, ShoeLastRead
 
-
 router = APIRouter(prefix="/shoe-lasts", tags=["Shoe Last"])
 
 DbSession = Annotated[AsyncSession, Depends(get_db_session)]

@@ -21,18 +21,12 @@ async def list_materials(
     statement = select(Material)
 
     if category is not None:
-        statement = (
-            statement
-            .join(Material.category)
-            .where(
-                MaterialCategory.material_category_code == category
-            )
+        statement = statement.join(Material.category).where(
+            MaterialCategory.material_category_code == category
         )
 
     if is_active is not None:
-        statement = statement.where(
-            Material.is_active == is_active
-        )
+        statement = statement.where(Material.is_active == is_active)
 
     if search is not None:
         search_pattern = f"%{search}%"
@@ -44,12 +38,7 @@ async def list_materials(
             )
         )
 
-    statement = (
-        statement
-        .order_by(Material.material_id)
-        .offset(offset)
-        .limit(limit)
-    )
+    statement = statement.order_by(Material.material_id).offset(offset).limit(limit)
 
     result = await session.execute(statement)
 
@@ -65,8 +54,9 @@ async def get_material(
         .where(Material.material_id == material_id)
         .options(
             selectinload(Material.category),
-            selectinload(Material.attribute_values)
-            .selectinload(MaterialAttributeValue.attribute),
+            selectinload(Material.attribute_values).selectinload(
+                MaterialAttributeValue.attribute
+            ),
         )
     )
 

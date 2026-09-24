@@ -5,26 +5,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_db_session
 from app.repositories.shoe_model import get_shoe_model_class
-
+from app.schemas.production_specification import (
+    ProductionSpecificationRead,
+)
 from app.schemas.shoe_model import (
     ShoeModelClassClone,
     ShoeModelClassRead,
     ShoeModelClassUpdate,
 )
-
 from app.services.model_class import (
     clone_model_class as service_clone_model_class,
+)
+from app.services.model_class import (
     update_model_class as service_update_model_class,
 )
-
-from app.schemas.production_specification import (
-    ProductionSpecificationRead,
-)
-
 from app.services.production_specification import (
     get_production_specification,
 )
-
 
 router = APIRouter(
     prefix="/model-classes",

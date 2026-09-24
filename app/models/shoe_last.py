@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean,
@@ -18,6 +19,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+if TYPE_CHECKING:
+    from app.models.shoe_model import ShoeModel
 
 
 class ShoeLast(Base):
@@ -61,8 +65,8 @@ class ShoeLast(Base):
     )
 
     shoe_models: Mapped[list[ShoeModel]] = relationship(
-    "ShoeModel",
-    back_populates="shoe_last",
+        "ShoeModel",
+        back_populates="shoe_last",
     )
 
 
@@ -130,4 +134,3 @@ class ShoeLastSize(Base):
     shoe_last: Mapped[ShoeLast] = relationship(
         back_populates="sizes",
     )
-    

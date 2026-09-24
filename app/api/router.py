@@ -2,14 +2,12 @@ from fastapi import APIRouter
 
 from app.api.v1.materials import router as materials_router
 from app.api.v1.model_classes import router as model_classes_router
-from app.api.v1.reference import router as reference_router
-from app.api.v1.shoe_lasts import router as shoe_lasts_router
-from app.api.v1.shoe_models import router as shoe_models_router
-
 from app.api.v1.production_composition import (
     router as production_composition_router,
 )
-
+from app.api.v1.reference import router as reference_router
+from app.api.v1.shoe_lasts import router as shoe_lasts_router
+from app.api.v1.shoe_models import router as shoe_models_router
 
 api_router = APIRouter()
 

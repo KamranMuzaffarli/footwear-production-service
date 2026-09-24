@@ -22,9 +22,7 @@ async def test_shoe_model_create_get_and_partial_update(
     client: AsyncClient,
     active_shoe_last: dict,
 ) -> None:
-    payload = make_model_payload(
-        active_shoe_last["shoe_last_id"]
-    )
+    payload = make_model_payload(active_shoe_last["shoe_last_id"])
 
     create_response = await client.post(
         "/api/v1/models",
@@ -38,14 +36,9 @@ async def test_shoe_model_create_get_and_partial_update(
 
     assert created["model_code"] == payload["model_code"]
     assert created["model_name"] == payload["model_name"]
-    assert (
-        created["shoe_last_id"]
-        == active_shoe_last["shoe_last_id"]
-    )
+    assert created["shoe_last_id"] == active_shoe_last["shoe_last_id"]
 
-    get_response = await client.get(
-        f"/api/v1/models/{model_id}"
-    )
+    get_response = await client.get(f"/api/v1/models/{model_id}")
 
     assert get_response.status_code == 200
 
@@ -66,42 +59,22 @@ async def test_shoe_model_create_get_and_partial_update(
 
     updated = patch_response.json()
 
-    assert (
-        updated["model_name"]
-        == "Updated Integration Model"
-    )
-    assert (
-        updated["description"]
-        == "Updated description"
-    )
+    assert updated["model_name"] == "Updated Integration Model"
+    assert updated["description"] == "Updated description"
 
     assert updated["model_code"] == payload["model_code"]
-    assert (
-        updated["shoe_last_id"]
-        == payload["shoe_last_id"]
-    )
-    assert (
-        updated["footwear_category"]
-        == payload["footwear_category"]
-    )
+    assert updated["shoe_last_id"] == payload["shoe_last_id"]
+    assert updated["footwear_category"] == payload["footwear_category"]
     assert updated["target_group"] == payload["target_group"]
 
-    final_response = await client.get(
-        f"/api/v1/models/{model_id}"
-    )
+    final_response = await client.get(f"/api/v1/models/{model_id}")
 
     assert final_response.status_code == 200
 
     final_model = final_response.json()
 
-    assert (
-        final_model["model_name"]
-        == "Updated Integration Model"
-    )
-    assert (
-        final_model["description"]
-        == "Updated description"
-    )
+    assert final_model["model_name"] == "Updated Integration Model"
+    assert final_model["description"] == "Updated description"
 
 
 async def test_shoe_model_duplicate_returns_centralized_409(

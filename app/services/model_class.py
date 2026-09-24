@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,12 +9,22 @@ from app.core.exceptions import (
     EntityNotFoundError,
 )
 from app.models.shoe_model import ShoeModelClass
+from app.repositories.production_composition import (
+    create_composition as repository_create_composition,
+)
+from app.repositories.production_composition import (
+    list_active_compositions,
+)
 from app.repositories.shoe_model import (
     create_shoe_model_class as repository_create_shoe_model_class,
+)
+from app.repositories.shoe_model import (
     get_construction_method,
     get_shoe_model,
     get_shoe_model_class,
     get_shoe_model_class_by_code,
+)
+from app.repositories.shoe_model import (
     update_shoe_model_class as repository_update_shoe_model_class,
 )
 from app.schemas.shoe_model import (
@@ -21,10 +33,7 @@ from app.schemas.shoe_model import (
     ShoeModelClassUpdate,
 )
 
-from app.repositories.production_composition import (
-    create_composition as repository_create_composition,
-    list_active_compositions,
-)
+logger = logging.getLogger(__name__)
 
 
 async def _validate_construction_method(
@@ -55,9 +64,7 @@ async def _validate_class_code(
     )
 
     if existing_class is not None:
-        raise ConflictError(
-            "Model Class code already exists for this Shoe Model"
-        )
+        raise ConflictError("Model Class code already exists for this Shoe Model")
 
 
 async def create_model_class(
@@ -95,12 +102,14 @@ async def create_model_class(
 
     except IntegrityError as exc:
         await session.rollback()
-        raise ConflictError(
-            "Model Class conflicts with existing data"
-        ) from exc
+        logger.warning(
+            "Model Class create transaction rolled back after integrity error"
+        )
+        raise ConflictError("Model Class conflicts with existing data") from exc
 
     except Exception:
         await session.rollback()
+        logger.exception("Model Class create transaction failed; changes rolled back")
         raise
 
     await session.refresh(shoe_model_class)
@@ -143,12 +152,14 @@ async def update_model_class(
 
     except IntegrityError as exc:
         await session.rollback()
-        raise ConflictError(
-            "Model Class conflicts with existing data"
-        ) from exc
+        logger.warning(
+            "Model Class update transaction rolled back after integrity error"
+        )
+        raise ConflictError("Model Class conflicts with existing data") from exc
 
     except Exception:
         await session.rollback()
+        logger.exception("Model Class update transaction failed; changes rolled back")
         raise
 
     await session.refresh(shoe_model_class)
@@ -200,12 +211,9 @@ async def clone_model_class(
         for source_composition in source_compositions:
             composition_data = {
                 "material_id": source_composition.material_id,
-                "material_usage_role_id":
-                    source_composition.material_usage_role_id,
-                "consumption_quantity":
-                    source_composition.consumption_quantity,
-                "consumption_unit":
-                    source_composition.consumption_unit,
+                "material_usage_role_id": source_composition.material_usage_role_id,
+                "consumption_quantity": source_composition.consumption_quantity,
+                "consumption_unit": source_composition.consumption_unit,
                 "is_required": source_composition.is_required,
                 "description": source_composition.description,
                 "is_active": True,
@@ -213,9 +221,7 @@ async def clone_model_class(
 
             await repository_create_composition(
                 session,
-                shoe_model_class_id=(
-                    cloned_class.shoe_model_class_id
-                ),
+                shoe_model_class_id=(cloned_class.shoe_model_class_id),
                 data=composition_data,
             )
 
@@ -223,12 +229,14 @@ async def clone_model_class(
 
     except IntegrityError as exc:
         await session.rollback()
-        raise ConflictError(
-            "Model Class clone conflicts with existing data"
-        ) from exc
+        logger.warning(
+            "Model Class clone transaction rolled back after integrity error"
+        )
+        raise ConflictError("Model Class clone conflicts with existing data") from exc
 
     except Exception:
         await session.rollback()
+        logger.exception("Model Class clone transaction failed; changes rolled back")
         raise
 
     await session.refresh(cloned_class)

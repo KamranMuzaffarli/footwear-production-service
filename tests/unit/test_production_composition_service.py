@@ -38,25 +38,17 @@ def patch_valid_create_dependencies(
     monkeypatch.setattr(
         service,
         "get_model_class",
-        AsyncMock(
-            return_value=SimpleNamespace(
-                shoe_model_class_id=20
-            )
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_class_id=20)),
     )
     monkeypatch.setattr(
         service,
         "get_material",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=True)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=True)),
     )
     monkeypatch.setattr(
         service,
         "get_usage_role",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=True)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=True)),
     )
 
 
@@ -89,11 +81,7 @@ async def test_create_composition_rejects_missing_material(
     monkeypatch.setattr(
         service,
         "get_model_class",
-        AsyncMock(
-            return_value=SimpleNamespace(
-                shoe_model_class_id=20
-            )
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_class_id=20)),
     )
     monkeypatch.setattr(
         service,
@@ -119,18 +107,12 @@ async def test_create_composition_rejects_inactive_material(
     monkeypatch.setattr(
         service,
         "get_model_class",
-        AsyncMock(
-            return_value=SimpleNamespace(
-                shoe_model_class_id=20
-            )
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_class_id=20)),
     )
     monkeypatch.setattr(
         service,
         "get_material",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=False)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=False)),
     )
 
     with pytest.raises(BusinessRuleError):
@@ -151,18 +133,12 @@ async def test_create_composition_rejects_missing_usage_role(
     monkeypatch.setattr(
         service,
         "get_model_class",
-        AsyncMock(
-            return_value=SimpleNamespace(
-                shoe_model_class_id=20
-            )
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_class_id=20)),
     )
     monkeypatch.setattr(
         service,
         "get_material",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=True)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=True)),
     )
     monkeypatch.setattr(
         service,
@@ -188,25 +164,17 @@ async def test_create_composition_rejects_inactive_usage_role(
     monkeypatch.setattr(
         service,
         "get_model_class",
-        AsyncMock(
-            return_value=SimpleNamespace(
-                shoe_model_class_id=20
-            )
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_class_id=20)),
     )
     monkeypatch.setattr(
         service,
         "get_material",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=True)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=True)),
     )
     monkeypatch.setattr(
         service,
         "get_usage_role",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=False)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=False)),
     )
 
     with pytest.raises(BusinessRuleError):
@@ -269,9 +237,7 @@ async def test_create_composition_reactivates_inactive_duplicate(
         AsyncMock(return_value=existing),
     )
 
-    repository_update = AsyncMock(
-        return_value=existing
-    )
+    repository_update = AsyncMock(return_value=existing)
     monkeypatch.setattr(
         service,
         "repository_update_composition",
@@ -324,17 +290,13 @@ async def test_create_composition_creates_new_row(
         AsyncMock(return_value=None),
     )
 
-    created = SimpleNamespace(
-        shoe_model_class_material_id=30
-    )
+    created = SimpleNamespace(shoe_model_class_material_id=30)
     reloaded = SimpleNamespace(
         shoe_model_class_material_id=30,
         is_active=True,
     )
 
-    repository_create = AsyncMock(
-        return_value=created
-    )
+    repository_create = AsyncMock(return_value=created)
     monkeypatch.setattr(
         service,
         "repository_create_composition",
@@ -374,11 +336,7 @@ async def test_update_composition_rejects_ownership_mismatch(
     monkeypatch.setattr(
         service,
         "get_model_class",
-        AsyncMock(
-            return_value=SimpleNamespace(
-                shoe_model_class_id=20
-            )
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_class_id=20)),
     )
     monkeypatch.setattr(
         service,
@@ -396,9 +354,7 @@ async def test_update_composition_rejects_ownership_mismatch(
             session,
             20,
             30,
-            ProductionCompositionUpdate(
-                consumption_unit="meter"
-            ),
+            ProductionCompositionUpdate(consumption_unit="meter"),
         )
 
     session.commit.assert_not_awaited()
@@ -421,11 +377,7 @@ async def test_update_composition_passes_only_explicit_fields(
     monkeypatch.setattr(
         service,
         "get_model_class",
-        AsyncMock(
-            return_value=SimpleNamespace(
-                shoe_model_class_id=20
-            )
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_class_id=20)),
     )
     monkeypatch.setattr(
         service,
@@ -438,9 +390,7 @@ async def test_update_composition_passes_only_explicit_fields(
         ),
     )
 
-    repository_update = AsyncMock(
-        return_value=composition
-    )
+    repository_update = AsyncMock(return_value=composition)
     monkeypatch.setattr(
         service,
         "repository_update_composition",
@@ -451,9 +401,7 @@ async def test_update_composition_passes_only_explicit_fields(
         session,
         20,
         30,
-        ProductionCompositionUpdate(
-            consumption_unit="meter"
-        ),
+        ProductionCompositionUpdate(consumption_unit="meter"),
     )
 
     assert result is reloaded
@@ -475,11 +423,7 @@ async def test_deactivate_composition_rejects_ownership_mismatch(
     monkeypatch.setattr(
         service,
         "get_model_class",
-        AsyncMock(
-            return_value=SimpleNamespace(
-                shoe_model_class_id=20
-            )
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_class_id=20)),
     )
     monkeypatch.setattr(
         service,
@@ -515,11 +459,7 @@ async def test_deactivate_composition_uses_soft_deactivation(
     monkeypatch.setattr(
         service,
         "get_model_class",
-        AsyncMock(
-            return_value=SimpleNamespace(
-                shoe_model_class_id=20
-            )
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_class_id=20)),
     )
     monkeypatch.setattr(
         service,

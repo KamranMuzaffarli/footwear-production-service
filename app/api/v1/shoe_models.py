@@ -23,9 +23,10 @@ from app.services.model_class import (
 )
 from app.services.shoe_model import (
     create_shoe_model as service_create_shoe_model,
+)
+from app.services.shoe_model import (
     update_shoe_model as service_update_shoe_model,
 )
-
 
 router = APIRouter(prefix="/models", tags=["Shoe Model"])
 

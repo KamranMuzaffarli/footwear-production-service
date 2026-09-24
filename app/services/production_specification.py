@@ -74,18 +74,13 @@ async def get_production_specification(
         )
 
     for composition in compositions:
-        composition_id = (
-            composition.shoe_model_class_material_id
-        )
+        composition_id = composition.shoe_model_class_material_id
 
         if not composition.material.is_active:
             validation_issues.append(
                 SpecificationValidationIssue(
                     code="inactive_material",
-                    message=(
-                        f"Composition {composition_id} uses "
-                        "an inactive Material"
-                    ),
+                    message=(f"Composition {composition_id} uses an inactive Material"),
                 )
             )
 
@@ -94,8 +89,7 @@ async def get_production_specification(
                 SpecificationValidationIssue(
                     code="inactive_usage_role",
                     message=(
-                        f"Composition {composition_id} uses "
-                        "an inactive Usage Role"
+                        f"Composition {composition_id} uses an inactive Usage Role"
                     ),
                 )
             )
@@ -105,8 +99,7 @@ async def get_production_specification(
                 SpecificationValidationIssue(
                     code="missing_consumption_quantity",
                     message=(
-                        f"Composition {composition_id} is missing "
-                        "consumption quantity"
+                        f"Composition {composition_id} is missing consumption quantity"
                     ),
                 )
             )
@@ -130,28 +123,19 @@ async def get_production_specification(
                 SpecificationValidationIssue(
                     code="missing_consumption_unit",
                     message=(
-                        f"Composition {composition_id} is missing "
-                        "consumption unit"
+                        f"Composition {composition_id} is missing consumption unit"
                     ),
                 )
             )
 
     return ProductionSpecificationRead(
-        shoe_model=SpecificationShoeModel.model_validate(
-            shoe_model
-        ),
-        model_class=SpecificationModelClass.model_validate(
-            model_class
-        ),
+        shoe_model=SpecificationShoeModel.model_validate(shoe_model),
+        model_class=SpecificationModelClass.model_validate(model_class),
         construction_method=(
-            SpecificationConstructionMethod.model_validate(
-                construction_method
-            )
+            SpecificationConstructionMethod.model_validate(construction_method)
         ),
         composition=[
-            SpecificationCompositionItem.model_validate(
-                composition
-            )
+            SpecificationCompositionItem.model_validate(composition)
             for composition in compositions
         ],
         is_production_ready=not validation_issues,

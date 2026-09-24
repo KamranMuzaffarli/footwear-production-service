@@ -33,9 +33,7 @@ async def get_active_material_with_attributes(
         if detail["attribute_values"]:
             return detail
 
-    raise AssertionError(
-        "Test seed must contain an active Material with attributes"
-    )
+    raise AssertionError("Test seed must contain an active Material with attributes")
 
 
 async def create_composition(
@@ -49,10 +47,7 @@ async def create_composition(
     description: str = "Specification test composition",
 ) -> dict:
     response = await client.post(
-        (
-            f"/api/v1/model-classes/"
-            f"{class_id}/materials"
-        ),
+        (f"/api/v1/model-classes/{class_id}/materials"),
         json={
             "material_id": material_id,
             "material_usage_role_id": usage_role_id,
@@ -92,9 +87,7 @@ async def get_second_active_material(
 async def test_production_specification_missing_class_returns_404(
     client: AsyncClient,
 ) -> None:
-    response = await client.get(
-        "/api/v1/model-classes/999999/specification"
-    )
+    response = await client.get("/api/v1/model-classes/999999/specification")
 
     assert response.status_code == 404
 
@@ -110,21 +103,15 @@ async def test_production_specification_ready_graph_is_aggregated_and_read_only(
     test_model_class: dict,
     active_usage_role: dict,
 ) -> None:
-    class_id = test_model_class[
-        "shoe_model_class_id"
-    ]
+    class_id = test_model_class["shoe_model_class_id"]
 
-    material = await get_active_material_with_attributes(
-        client
-    )
+    material = await get_active_material_with_attributes(client)
 
     active_row = await create_composition(
         client,
         class_id=class_id,
         material_id=material["material_id"],
-        usage_role_id=active_usage_role[
-            "material_usage_role_id"
-        ],
+        usage_role_id=active_usage_role["material_usage_role_id"],
         quantity="1.750",
         unit="pair",
         description="Ready specification composition",
@@ -139,9 +126,7 @@ async def test_production_specification_ready_graph_is_aggregated_and_read_only(
         client,
         class_id=class_id,
         material_id=second_material["material_id"],
-        usage_role_id=active_usage_role[
-            "material_usage_role_id"
-        ],
+        usage_role_id=active_usage_role["material_usage_role_id"],
         quantity="0.500",
         unit="meter",
         description="Inactive specification composition",
@@ -157,17 +142,13 @@ async def test_production_specification_ready_graph_is_aggregated_and_read_only(
     assert delete_response.status_code == 204
 
     class_result = await db_session.execute(
-        select(ShoeModelClass).where(
-            ShoeModelClass.shoe_model_class_id
-            == class_id
-        )
+        select(ShoeModelClass).where(ShoeModelClass.shoe_model_class_id == class_id)
     )
     model_class = class_result.scalar_one()
 
     composition_result = await db_session.execute(
         select(ShoeModelClassMaterial).where(
-            ShoeModelClassMaterial
-            .shoe_model_class_material_id
+            ShoeModelClassMaterial.shoe_model_class_material_id
             == active_row["shoe_model_class_material_id"]
         )
     )
@@ -191,12 +172,7 @@ async def test_production_specification_ready_graph_is_aggregated_and_read_only(
         composition.is_active,
     )
 
-    response = await client.get(
-        (
-            f"/api/v1/model-classes/"
-            f"{class_id}/specification"
-        )
-    )
+    response = await client.get((f"/api/v1/model-classes/{class_id}/specification"))
 
     assert response.status_code == 200
 
@@ -210,12 +186,7 @@ async def test_production_specification_ready_graph_is_aggregated_and_read_only(
     assert specification["model_class"]
     assert specification["construction_method"]
 
-    assert (
-        specification["model_class"][
-            "shoe_model_class_id"
-        ]
-        == class_id
-    )
+    assert specification["model_class"]["shoe_model_class_id"] == class_id
 
     rows = specification["composition"]
 
@@ -229,25 +200,16 @@ async def test_production_specification_ready_graph_is_aggregated_and_read_only(
     assert rows[0]["material"]["category"]
     assert rows[0]["usage_role"]
 
-    assert (
-        Decimal(str(rows[0]["consumption_quantity"]))
-        == Decimal("1.750")
-    )
+    assert Decimal(str(rows[0]["consumption_quantity"])) == Decimal("1.750")
     assert rows[0]["consumption_unit"] == "pair"
 
-    assert (
-        inactive_row["shoe_model_class_material_id"]
-        not in {
-            row["shoe_model_class_material_id"]
-            for row in rows
-        }
-    )
+    assert inactive_row["shoe_model_class_material_id"] not in {
+        row["shoe_model_class_material_id"] for row in rows
+    }
 
     assert "production_standard" not in specification
 
-    attribute_values = rows[0]["material"][
-        "attribute_values"
-    ]
+    attribute_values = rows[0]["material"]["attribute_values"]
 
     assert attribute_values
 
@@ -257,50 +219,34 @@ async def test_production_specification_ready_graph_is_aggregated_and_read_only(
     assert "value_numeric" in first_attribute_value
     assert "value_boolean" in first_attribute_value
     assert first_attribute_value["attribute"]
-    assert (
-        first_attribute_value["attribute"][
-            "material_attribute_id"
-        ]
-        > 0
-    )
-    assert first_attribute_value["attribute"][
-        "material_attribute_code"
-    ]
+    assert first_attribute_value["attribute"]["material_attribute_id"] > 0
+    assert first_attribute_value["attribute"]["material_attribute_code"]
 
     await db_session.refresh(model_class)
     await db_session.refresh(composition)
 
     assert (
-        (
-            model_class.construction_method_id,
-            model_class.quality_level,
-            model_class.warranty_months,
-            model_class.description,
-            model_class.is_active,
-        )
-        == class_snapshot
-    )
+        model_class.construction_method_id,
+        model_class.quality_level,
+        model_class.warranty_months,
+        model_class.description,
+        model_class.is_active,
+    ) == class_snapshot
 
     assert (
-        (
-            composition.material_id,
-            composition.material_usage_role_id,
-            composition.consumption_quantity,
-            composition.consumption_unit,
-            composition.is_required,
-            composition.description,
-            composition.is_active,
-        )
-        == composition_snapshot
-    )
+        composition.material_id,
+        composition.material_usage_role_id,
+        composition.consumption_quantity,
+        composition.consumption_unit,
+        composition.is_required,
+        composition.description,
+        composition.is_active,
+    ) == composition_snapshot
 
     inactive_result = await db_session.execute(
         select(ShoeModelClassMaterial).where(
-            ShoeModelClassMaterial
-            .shoe_model_class_material_id
-            == inactive_row[
-                "shoe_model_class_material_id"
-            ]
+            ShoeModelClassMaterial.shoe_model_class_material_id
+            == inactive_row["shoe_model_class_material_id"]
         )
     )
 
@@ -315,17 +261,13 @@ async def test_production_specification_not_ready_returns_200(
     active_material: dict,
     active_usage_role: dict,
 ) -> None:
-    class_id = test_model_class[
-        "shoe_model_class_id"
-    ]
+    class_id = test_model_class["shoe_model_class_id"]
 
     composition = await create_composition(
         client,
         class_id=class_id,
         material_id=active_material["material_id"],
-        usage_role_id=active_usage_role[
-            "material_usage_role_id"
-        ],
+        usage_role_id=active_usage_role["material_usage_role_id"],
     )
 
     patch_response = await client.patch(
@@ -340,12 +282,7 @@ async def test_production_specification_not_ready_returns_200(
 
     assert patch_response.status_code == 200
 
-    response = await client.get(
-        (
-            f"/api/v1/model-classes/"
-            f"{class_id}/specification"
-        )
-    )
+    response = await client.get((f"/api/v1/model-classes/{class_id}/specification"))
 
     assert response.status_code == 200
 
@@ -353,10 +290,7 @@ async def test_production_specification_not_ready_returns_200(
 
     assert specification["is_production_ready"] is False
 
-    issue_codes = {
-        issue["code"]
-        for issue in specification["validation_issues"]
-    }
+    issue_codes = {issue["code"] for issue in specification["validation_issues"]}
 
     assert "missing_consumption_unit" in issue_codes
 
@@ -365,16 +299,9 @@ async def test_production_specification_without_active_composition(
     client: AsyncClient,
     test_model_class: dict,
 ) -> None:
-    class_id = test_model_class[
-        "shoe_model_class_id"
-    ]
+    class_id = test_model_class["shoe_model_class_id"]
 
-    response = await client.get(
-        (
-            f"/api/v1/model-classes/"
-            f"{class_id}/specification"
-        )
-    )
+    response = await client.get((f"/api/v1/model-classes/{class_id}/specification"))
 
     assert response.status_code == 200
 
@@ -383,10 +310,7 @@ async def test_production_specification_without_active_composition(
     assert specification["is_production_ready"] is False
     assert specification["composition"] == []
 
-    issue_codes = {
-        issue["code"]
-        for issue in specification["validation_issues"]
-    }
+    issue_codes = {issue["code"] for issue in specification["validation_issues"]}
 
     assert "no_active_composition" in issue_codes
 
@@ -397,17 +321,13 @@ async def test_production_specification_collects_multiple_issues(
     active_material: dict,
     active_usage_role: dict,
 ) -> None:
-    class_id = test_model_class[
-        "shoe_model_class_id"
-    ]
+    class_id = test_model_class["shoe_model_class_id"]
 
     composition = await create_composition(
         client,
         class_id=class_id,
         material_id=active_material["material_id"],
-        usage_role_id=active_usage_role[
-            "material_usage_role_id"
-        ],
+        usage_role_id=active_usage_role["material_usage_role_id"],
     )
 
     composition_patch_response = await client.patch(
@@ -431,12 +351,7 @@ async def test_production_specification_collects_multiple_issues(
 
     assert class_patch_response.status_code == 200
 
-    response = await client.get(
-        (
-            f"/api/v1/model-classes/"
-            f"{class_id}/specification"
-        )
-    )
+    response = await client.get((f"/api/v1/model-classes/{class_id}/specification"))
 
     assert response.status_code == 200
 
@@ -444,10 +359,7 @@ async def test_production_specification_collects_multiple_issues(
 
     assert specification["is_production_ready"] is False
 
-    issue_codes = {
-        issue["code"]
-        for issue in specification["validation_issues"]
-    }
+    issue_codes = {issue["code"] for issue in specification["validation_issues"]}
 
     assert {
         "inactive_model_class",

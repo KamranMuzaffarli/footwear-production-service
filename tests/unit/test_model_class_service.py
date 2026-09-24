@@ -62,9 +62,7 @@ async def test_create_model_class_rejects_missing_construction_method(
     monkeypatch.setattr(
         service,
         "get_shoe_model",
-        AsyncMock(
-            return_value=SimpleNamespace(shoe_model_id=10)
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_id=10)),
     )
     monkeypatch.setattr(
         service,
@@ -90,16 +88,12 @@ async def test_create_model_class_rejects_inactive_construction_method(
     monkeypatch.setattr(
         service,
         "get_shoe_model",
-        AsyncMock(
-            return_value=SimpleNamespace(shoe_model_id=10)
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_id=10)),
     )
     monkeypatch.setattr(
         service,
         "get_construction_method",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=False)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=False)),
     )
 
     with pytest.raises(BusinessRuleError):
@@ -120,25 +114,17 @@ async def test_create_model_class_rejects_duplicate_code(
     monkeypatch.setattr(
         service,
         "get_shoe_model",
-        AsyncMock(
-            return_value=SimpleNamespace(shoe_model_id=10)
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_id=10)),
     )
     monkeypatch.setattr(
         service,
         "get_construction_method",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=True)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=True)),
     )
     monkeypatch.setattr(
         service,
         "get_shoe_model_class_by_code",
-        AsyncMock(
-            return_value=SimpleNamespace(
-                shoe_model_class_id=20
-            )
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_class_id=20)),
     )
 
     with pytest.raises(ConflictError):
@@ -155,23 +141,17 @@ async def test_create_model_class_commits_successful_create(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     session = make_session()
-    created_class = SimpleNamespace(
-        shoe_model_class_id=20
-    )
+    created_class = SimpleNamespace(shoe_model_class_id=20)
 
     monkeypatch.setattr(
         service,
         "get_shoe_model",
-        AsyncMock(
-            return_value=SimpleNamespace(shoe_model_id=10)
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_id=10)),
     )
     monkeypatch.setattr(
         service,
         "get_construction_method",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=True)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=True)),
     )
     monkeypatch.setattr(
         service,
@@ -179,9 +159,7 @@ async def test_create_model_class_commits_successful_create(
         AsyncMock(return_value=None),
     )
 
-    repository_create = AsyncMock(
-        return_value=created_class
-    )
+    repository_create = AsyncMock(return_value=created_class)
     monkeypatch.setattr(
         service,
         "repository_create_shoe_model_class",
@@ -204,9 +182,7 @@ async def test_create_model_class_commits_successful_create(
         data=data.model_dump(),
     )
     session.commit.assert_awaited_once()
-    session.refresh.assert_awaited_once_with(
-        created_class
-    )
+    session.refresh.assert_awaited_once_with(created_class)
     session.rollback.assert_not_awaited()
 
 
@@ -225,9 +201,7 @@ async def test_update_model_class_rejects_missing_class(
         await service.update_model_class(
             session,
             999,
-            ShoeModelClassUpdate(
-                quality_level="premium"
-            ),
+            ShoeModelClassUpdate(quality_level="premium"),
         )
 
     session.commit.assert_not_awaited()
@@ -237,9 +211,7 @@ async def test_update_model_class_rejects_inactive_new_construction_method(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     session = make_session()
-    model_class = SimpleNamespace(
-        shoe_model_class_id=20
-    )
+    model_class = SimpleNamespace(shoe_model_class_id=20)
 
     monkeypatch.setattr(
         service,
@@ -249,18 +221,14 @@ async def test_update_model_class_rejects_inactive_new_construction_method(
     monkeypatch.setattr(
         service,
         "get_construction_method",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=False)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=False)),
     )
 
     with pytest.raises(BusinessRuleError):
         await service.update_model_class(
             session,
             20,
-            ShoeModelClassUpdate(
-                construction_method_id=3
-            ),
+            ShoeModelClassUpdate(construction_method_id=3),
         )
 
     session.commit.assert_not_awaited()
@@ -270,16 +238,10 @@ async def test_update_model_class_validates_method_and_commits(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     session = make_session()
-    model_class = SimpleNamespace(
-        shoe_model_class_id=20
-    )
+    model_class = SimpleNamespace(shoe_model_class_id=20)
 
-    get_construction_method = AsyncMock(
-        return_value=SimpleNamespace(is_active=True)
-    )
-    repository_update = AsyncMock(
-        return_value=model_class
-    )
+    get_construction_method = AsyncMock(return_value=SimpleNamespace(is_active=True))
+    repository_update = AsyncMock(return_value=model_class)
 
     monkeypatch.setattr(
         service,
@@ -321,9 +283,7 @@ async def test_update_model_class_validates_method_and_commits(
         },
     )
     session.commit.assert_awaited_once()
-    session.refresh.assert_awaited_once_with(
-        model_class
-    )
+    session.refresh.assert_awaited_once_with(model_class)
 
 
 async def test_clone_model_class_copies_active_compositions_and_commits(
@@ -360,9 +320,7 @@ async def test_clone_model_class_copies_active_compositions_and_commits(
         ),
     ]
 
-    cloned_class = SimpleNamespace(
-        shoe_model_class_id=30
-    )
+    cloned_class = SimpleNamespace(shoe_model_class_id=30)
 
     monkeypatch.setattr(
         service,
@@ -377,14 +335,10 @@ async def test_clone_model_class_copies_active_compositions_and_commits(
     monkeypatch.setattr(
         service,
         "list_active_compositions",
-        AsyncMock(
-            return_value=source_compositions
-        ),
+        AsyncMock(return_value=source_compositions),
     )
 
-    repository_create_class = AsyncMock(
-        return_value=cloned_class
-    )
+    repository_create_class = AsyncMock(return_value=cloned_class)
     repository_create_composition = AsyncMock()
 
     monkeypatch.setattr(
@@ -423,39 +377,34 @@ async def test_clone_model_class_copies_active_compositions_and_commits(
         },
     )
 
-    assert (
-        repository_create_composition.await_args_list
-        == [
-            call(
-                session,
-                shoe_model_class_id=30,
-                data={
-                    "material_id": 100,
-                    "material_usage_role_id": 1,
-                    "consumption_quantity": 1.5,
-                    "consumption_unit": "pair",
-                    "is_required": True,
-                    "description": "First",
-                    "is_active": True,
-                },
-            ),
-            call(
-                session,
-                shoe_model_class_id=30,
-                data={
-                    "material_id": 101,
-                    "material_usage_role_id": 2,
-                    "consumption_quantity": 0.5,
-                    "consumption_unit": "meter",
-                    "is_required": False,
-                    "description": "Second",
-                    "is_active": True,
-                },
-            ),
-        ]
-    )
+    assert repository_create_composition.await_args_list == [
+        call(
+            session,
+            shoe_model_class_id=30,
+            data={
+                "material_id": 100,
+                "material_usage_role_id": 1,
+                "consumption_quantity": 1.5,
+                "consumption_unit": "pair",
+                "is_required": True,
+                "description": "First",
+                "is_active": True,
+            },
+        ),
+        call(
+            session,
+            shoe_model_class_id=30,
+            data={
+                "material_id": 101,
+                "material_usage_role_id": 2,
+                "consumption_quantity": 0.5,
+                "consumption_unit": "meter",
+                "is_required": False,
+                "description": "Second",
+                "is_active": True,
+            },
+        ),
+    ]
 
     session.commit.assert_awaited_once()
-    session.refresh.assert_awaited_once_with(
-        cloned_class
-    )
+    session.refresh.assert_awaited_once_with(cloned_class)

@@ -15,7 +15,6 @@ from app.schemas.reference import (
     MaterialUsageRoleRead,
 )
 
-
 router = APIRouter(tags=["Reference Data"])
 
 DbSession = Annotated[AsyncSession, Depends(get_db_session)]

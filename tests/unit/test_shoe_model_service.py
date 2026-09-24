@@ -62,9 +62,7 @@ async def test_create_shoe_model_rejects_inactive_shoe_last(
     monkeypatch.setattr(
         service,
         "get_shoe_last",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=False)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=False)),
     )
 
     with pytest.raises(BusinessRuleError):
@@ -84,16 +82,12 @@ async def test_create_shoe_model_rejects_duplicate_code(
     monkeypatch.setattr(
         service,
         "get_shoe_last",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=True)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=True)),
     )
     monkeypatch.setattr(
         service,
         "get_shoe_model_by_code",
-        AsyncMock(
-            return_value=SimpleNamespace(shoe_model_id=99)
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_id=99)),
     )
 
     with pytest.raises(ConflictError):
@@ -114,9 +108,7 @@ async def test_create_shoe_model_commits_successful_create(
     monkeypatch.setattr(
         service,
         "get_shoe_last",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=True)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=True)),
     )
     monkeypatch.setattr(
         service,
@@ -124,9 +116,7 @@ async def test_create_shoe_model_commits_successful_create(
         AsyncMock(return_value=None),
     )
 
-    repository_create = AsyncMock(
-        return_value=created_model
-    )
+    repository_create = AsyncMock(return_value=created_model)
     monkeypatch.setattr(
         service,
         "repository_create_shoe_model",
@@ -157,9 +147,7 @@ async def test_create_shoe_model_rolls_back_integrity_error(
     monkeypatch.setattr(
         service,
         "get_shoe_last",
-        AsyncMock(
-            return_value=SimpleNamespace(is_active=True)
-        ),
+        AsyncMock(return_value=SimpleNamespace(is_active=True)),
     )
     monkeypatch.setattr(
         service,
@@ -215,9 +203,7 @@ async def test_update_shoe_model_validates_new_shoe_last(
     session = make_session()
     model = SimpleNamespace(shoe_model_id=10)
 
-    get_shoe_last = AsyncMock(
-        return_value=SimpleNamespace(is_active=True)
-    )
+    get_shoe_last = AsyncMock(return_value=SimpleNamespace(is_active=True))
     repository_update = AsyncMock(return_value=model)
 
     monkeypatch.setattr(
@@ -268,11 +254,7 @@ async def test_update_shoe_model_rejects_conflicting_code(
     monkeypatch.setattr(
         service,
         "get_shoe_model_by_code",
-        AsyncMock(
-            return_value=SimpleNamespace(
-                shoe_model_id=11
-            )
-        ),
+        AsyncMock(return_value=SimpleNamespace(shoe_model_id=11)),
     )
 
     with pytest.raises(ConflictError):

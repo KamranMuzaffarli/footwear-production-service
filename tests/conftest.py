@@ -7,30 +7,23 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
     create_async_engine,
 )
+from sqlalchemy.pool import NullPool
 
 from app.api.dependencies import get_db_session
 from app.core.config import settings
 from app.main import app
-from sqlalchemy.pool import NullPool
-
 
 if settings.test_database_url is None:
-    raise RuntimeError(
-        "TEST_DATABASE_URL is required to run the test suite"
-    )
+    raise RuntimeError("TEST_DATABASE_URL is required to run the test suite")
 
 development_url = make_url(settings.database_url)
 test_url = make_url(settings.test_database_url)
 
 if development_url == test_url:
-    raise RuntimeError(
-        "TEST_DATABASE_URL must not point to the development database"
-    )
+    raise RuntimeError("TEST_DATABASE_URL must not point to the development database")
 
 if development_url.database == test_url.database:
-    raise RuntimeError(
-        "Test and development database names must be different"
-    )
+    raise RuntimeError("Test and development database names must be different")
 
 
 test_engine = create_async_engine(
@@ -64,9 +57,7 @@ async def client(
     async def override_get_db_session() -> AsyncIterator[AsyncSession]:
         yield db_session
 
-    app.dependency_overrides[get_db_session] = (
-        override_get_db_session
-    )
+    app.dependency_overrides[get_db_session] = override_get_db_session
 
     transport = ASGITransport(app=app)
 
@@ -87,27 +78,17 @@ async def active_shoe_last(
     response = await client.get("/api/v1/shoe-lasts")
     assert response.status_code == 200
 
-    return next(
-        shoe_last
-        for shoe_last in response.json()
-        if shoe_last["is_active"]
-    )
+    return next(shoe_last for shoe_last in response.json() if shoe_last["is_active"])
 
 
 @pytest_asyncio.fixture
 async def active_construction_method(
     client: AsyncClient,
 ) -> dict:
-    response = await client.get(
-        "/api/v1/construction-methods"
-    )
+    response = await client.get("/api/v1/construction-methods")
     assert response.status_code == 200
 
-    return next(
-        method
-        for method in response.json()
-        if method["is_active"]
-    )
+    return next(method for method in response.json() if method["is_active"])
 
 
 @pytest_asyncio.fixture
@@ -133,16 +114,10 @@ async def active_material(
 async def active_usage_role(
     client: AsyncClient,
 ) -> dict:
-    response = await client.get(
-        "/api/v1/material-usage-roles"
-    )
+    response = await client.get("/api/v1/material-usage-roles")
     assert response.status_code == 200
 
-    return next(
-        role
-        for role in response.json()
-        if role["is_active"]
-    )
+    return next(role for role in response.json() if role["is_active"])
 
 
 @pytest_asyncio.fixture
@@ -176,17 +151,12 @@ async def test_model_class(
     active_construction_method: dict,
 ) -> dict:
     response = await client.post(
-        (
-            f"/api/v1/models/"
-            f"{test_shoe_model['shoe_model_id']}/classes"
-        ),
+        (f"/api/v1/models/{test_shoe_model['shoe_model_id']}/classes"),
         json={
             "class_code": "TEST_INTEGRATION_CLASS",
             "class_name": "Integration Test Class",
             "construction_method_id": (
-                active_construction_method[
-                    "construction_method_id"
-                ]
+                active_construction_method["construction_method_id"]
             ),
             "quality_level": "test",
             "warranty_months": 12,

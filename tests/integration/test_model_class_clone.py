@@ -27,23 +27,13 @@ async def get_active_combinations(
     )
     assert materials_response.status_code == 200
 
-    roles_response = await client.get(
-        "/api/v1/material-usage-roles"
-    )
+    roles_response = await client.get("/api/v1/material-usage-roles")
     assert roles_response.status_code == 200
 
     materials = materials_response.json()
-    roles = [
-        role
-        for role in roles_response.json()
-        if role["is_active"]
-    ]
+    roles = [role for role in roles_response.json() if role["is_active"]]
 
-    combinations = [
-        (material, role)
-        for material in materials
-        for role in roles
-    ]
+    combinations = [(material, role) for material in materials for role in roles]
 
     assert len(combinations) >= count
 
@@ -59,17 +49,12 @@ async def prepare_source_compositions(
         count=3,
     )
 
-    path = (
-        f"/api/v1/model-classes/"
-        f"{source_class_id}/materials"
-    )
+    path = f"/api/v1/model-classes/{source_class_id}/materials"
 
     payloads = [
         {
             "material_id": combinations[0][0]["material_id"],
-            "material_usage_role_id": combinations[0][1][
-                "material_usage_role_id"
-            ],
+            "material_usage_role_id": combinations[0][1]["material_usage_role_id"],
             "consumption_quantity": "1.250",
             "consumption_unit": "pair",
             "is_required": True,
@@ -77,9 +62,7 @@ async def prepare_source_compositions(
         },
         {
             "material_id": combinations[1][0]["material_id"],
-            "material_usage_role_id": combinations[1][1][
-                "material_usage_role_id"
-            ],
+            "material_usage_role_id": combinations[1][1]["material_usage_role_id"],
             "consumption_quantity": "0.750",
             "consumption_unit": "meter",
             "is_required": False,
@@ -87,9 +70,7 @@ async def prepare_source_compositions(
         },
         {
             "material_id": combinations[2][0]["material_id"],
-            "material_usage_role_id": combinations[2][1][
-                "material_usage_role_id"
-            ],
+            "material_usage_role_id": combinations[2][1]["material_usage_role_id"],
             "consumption_quantity": "2.000",
             "consumption_unit": "sheet",
             "is_required": True,
@@ -111,10 +92,7 @@ async def prepare_source_compositions(
     inactive_row = created_rows[2]
 
     delete_response = await client.delete(
-        (
-            f"{path}/"
-            f"{inactive_row['shoe_model_class_material_id']}"
-        )
+        (f"{path}/{inactive_row['shoe_model_class_material_id']}")
     )
 
     assert delete_response.status_code == 204
@@ -130,9 +108,7 @@ def composition_business_map(
             row["material_id"],
             row["material_usage_role_id"],
         ): {
-            "consumption_quantity": Decimal(
-                str(row["consumption_quantity"])
-            ),
+            "consumption_quantity": Decimal(str(row["consumption_quantity"])),
             "consumption_unit": row["consumption_unit"],
             "is_required": row["is_required"],
             "description": row["description"],
@@ -146,47 +122,32 @@ async def test_model_class_clone_copies_only_active_compositions(
     db_session: AsyncSession,
     test_model_class: dict,
 ) -> None:
-    source_id = test_model_class[
-        "shoe_model_class_id"
-    ]
+    source_id = test_model_class["shoe_model_class_id"]
 
-    active_rows, inactive_row = (
-        await prepare_source_compositions(
-            client,
-            source_id,
-        )
+    active_rows, inactive_row = await prepare_source_compositions(
+        client,
+        source_id,
     )
 
     source_class_before_response = await client.get(
         f"/api/v1/model-classes/{source_id}"
     )
     assert source_class_before_response.status_code == 200
-    source_class_before = (
-        source_class_before_response.json()
-    )
+    source_class_before = source_class_before_response.json()
 
     source_active_before_response = await client.get(
-        (
-            f"/api/v1/model-classes/"
-            f"{source_id}/materials"
-        )
+        (f"/api/v1/model-classes/{source_id}/materials")
     )
     assert source_active_before_response.status_code == 200
-    source_active_before = (
-        source_active_before_response.json()
-    )
+    source_active_before = source_active_before_response.json()
 
     assert len(source_active_before) == 2
 
-    inactive_id = inactive_row[
-        "shoe_model_class_material_id"
-    ]
+    inactive_id = inactive_row["shoe_model_class_material_id"]
 
     inactive_result = await db_session.execute(
         select(ShoeModelClassMaterial).where(
-            ShoeModelClassMaterial
-            .shoe_model_class_material_id
-            == inactive_id
+            ShoeModelClassMaterial.shoe_model_class_material_id == inactive_id
         )
     )
     inactive_before = inactive_result.scalar_one()
@@ -203,17 +164,12 @@ async def test_model_class_clone_copies_only_active_compositions(
         inactive_before.is_active,
     )
 
-    material_ids = {
-        row["material_id"]
-        for row in active_rows + [inactive_row]
-    }
+    material_ids = {row["material_id"] for row in active_rows + [inactive_row]}
 
     materials_before = {}
 
     for material_id in material_ids:
-        response = await client.get(
-            f"/api/v1/materials/{material_id}"
-        )
+        response = await client.get(f"/api/v1/materials/{material_id}")
         assert response.status_code == 200
         materials_before[material_id] = response.json()
 
@@ -231,41 +187,19 @@ async def test_model_class_clone_copies_only_active_compositions(
     clone_id = clone["shoe_model_class_id"]
 
     assert clone_id != source_id
-    assert (
-        clone["shoe_model_id"]
-        == source_class_before["shoe_model_id"]
-    )
+    assert clone["shoe_model_id"] == source_class_before["shoe_model_id"]
     assert clone["class_code"] == "TEST_CLONE_SUCCESS"
+    assert clone["class_name"] == "Successful Test Clone"
     assert (
-        clone["class_name"]
-        == "Successful Test Clone"
+        clone["construction_method_id"] == source_class_before["construction_method_id"]
     )
-    assert (
-        clone["construction_method_id"]
-        == source_class_before["construction_method_id"]
-    )
-    assert (
-        clone["quality_level"]
-        == source_class_before["quality_level"]
-    )
-    assert (
-        clone["warranty_months"]
-        == source_class_before["warranty_months"]
-    )
-    assert (
-        clone["description"]
-        == source_class_before["description"]
-    )
-    assert (
-        clone["is_active"]
-        == source_class_before["is_active"]
-    )
+    assert clone["quality_level"] == source_class_before["quality_level"]
+    assert clone["warranty_months"] == source_class_before["warranty_months"]
+    assert clone["description"] == source_class_before["description"]
+    assert clone["is_active"] == source_class_before["is_active"]
 
     clone_compositions_response = await client.get(
-        (
-            f"/api/v1/model-classes/"
-            f"{clone_id}/materials"
-        )
+        (f"/api/v1/model-classes/{clone_id}/materials")
     )
 
     assert clone_compositions_response.status_code == 200
@@ -275,15 +209,11 @@ async def test_model_class_clone_copies_only_active_compositions(
     assert len(clone_rows) == len(source_active_before)
     assert len(clone_rows) == 2
 
-    assert (
-        composition_business_map(clone_rows)
-        == composition_business_map(source_active_before)
+    assert composition_business_map(clone_rows) == composition_business_map(
+        source_active_before
     )
 
-    assert all(
-        row["is_active"] is True
-        for row in clone_rows
-    )
+    assert all(row["is_active"] is True for row in clone_rows)
 
     inactive_combination = (
         inactive_row["material_id"],
@@ -300,28 +230,17 @@ async def test_model_class_clone_copies_only_active_compositions(
 
     assert inactive_combination not in clone_combinations
 
-    source_class_after_response = await client.get(
-        f"/api/v1/model-classes/{source_id}"
-    )
+    source_class_after_response = await client.get(f"/api/v1/model-classes/{source_id}")
     assert source_class_after_response.status_code == 200
 
-    assert (
-        source_class_after_response.json()
-        == source_class_before
-    )
+    assert source_class_after_response.json() == source_class_before
 
     source_active_after_response = await client.get(
-        (
-            f"/api/v1/model-classes/"
-            f"{source_id}/materials"
-        )
+        (f"/api/v1/model-classes/{source_id}/materials")
     )
     assert source_active_after_response.status_code == 200
 
-    assert (
-        source_active_after_response.json()
-        == source_active_before
-    )
+    assert source_active_after_response.json() == source_active_before
 
     await db_session.refresh(inactive_before)
 
@@ -337,12 +256,8 @@ async def test_model_class_clone_copies_only_active_compositions(
 
     assert inactive_after_snapshot == inactive_snapshot
 
-    for material_id, material_before in (
-        materials_before.items()
-    ):
-        response = await client.get(
-            f"/api/v1/materials/{material_id}"
-        )
+    for material_id, material_before in materials_before.items():
+        response = await client.get(f"/api/v1/materials/{material_id}")
         assert response.status_code == 200
         assert response.json() == material_before
 
@@ -370,9 +285,7 @@ async def test_model_class_clone_duplicate_code_returns_409(
     client: AsyncClient,
     test_model_class: dict,
 ) -> None:
-    source_id = test_model_class[
-        "shoe_model_class_id"
-    ]
+    source_id = test_model_class["shoe_model_class_id"]
 
     response = await client.post(
         f"/api/v1/model-classes/{source_id}/clone",
@@ -394,9 +307,7 @@ async def test_model_class_clone_validation_returns_422(
     client: AsyncClient,
     test_model_class: dict,
 ) -> None:
-    source_id = test_model_class[
-        "shoe_model_class_id"
-    ]
+    source_id = test_model_class["shoe_model_class_id"]
 
     missing_field_response = await client.post(
         f"/api/v1/model-classes/{source_id}/clone",
@@ -427,31 +338,22 @@ async def test_model_class_clone_rolls_back_partial_database_work(
     monkeypatch: pytest.MonkeyPatch,
     test_model_class: dict,
 ) -> None:
-    source_id = test_model_class[
-        "shoe_model_class_id"
-    ]
+    source_id = test_model_class["shoe_model_class_id"]
 
     await prepare_source_compositions(
         client,
         source_id,
     )
 
-    source_before_response = await client.get(
-        f"/api/v1/model-classes/{source_id}"
-    )
+    source_before_response = await client.get(f"/api/v1/model-classes/{source_id}")
     assert source_before_response.status_code == 200
     source_before = source_before_response.json()
 
     compositions_before_response = await client.get(
-        (
-            f"/api/v1/model-classes/"
-            f"{source_id}/materials"
-        )
+        (f"/api/v1/model-classes/{source_id}/materials")
     )
     assert compositions_before_response.status_code == 200
-    compositions_before = (
-        compositions_before_response.json()
-    )
+    compositions_before = compositions_before_response.json()
 
     assert len(compositions_before) == 2
 
@@ -471,9 +373,7 @@ async def test_model_class_clone_rolls_back_partial_database_work(
         composition_calls += 1
 
         if composition_calls == 2:
-            raise RuntimeError(
-                "forced clone composition failure"
-            )
+            raise RuntimeError("forced clone composition failure")
 
         return await real_create_composition(
             session,
@@ -505,18 +405,14 @@ async def test_model_class_clone_rolls_back_partial_database_work(
 
     clone_by_id_result = await db_session.execute(
         select(ShoeModelClass).where(
-            ShoeModelClass.shoe_model_class_id
-            == clone_class_id
+            ShoeModelClass.shoe_model_class_id == clone_class_id
         )
     )
 
     assert clone_by_id_result.scalar_one_or_none() is None
 
     clone_by_code_result = await db_session.execute(
-        select(ShoeModelClass).where(
-            ShoeModelClass.class_code
-            == "TEST_CLONE_ROLLBACK"
-        )
+        select(ShoeModelClass).where(ShoeModelClass.class_code == "TEST_CLONE_ROLLBACK")
     )
 
     assert clone_by_code_result.scalar_one_or_none() is None
@@ -524,30 +420,19 @@ async def test_model_class_clone_rolls_back_partial_database_work(
     partial_count_result = await db_session.execute(
         select(func.count())
         .select_from(ShoeModelClassMaterial)
-        .where(
-            ShoeModelClassMaterial.shoe_model_class_id
-            == clone_class_id
-        )
+        .where(ShoeModelClassMaterial.shoe_model_class_id == clone_class_id)
     )
 
     assert partial_count_result.scalar_one() == 0
 
-    source_after_response = await client.get(
-        f"/api/v1/model-classes/{source_id}"
-    )
+    source_after_response = await client.get(f"/api/v1/model-classes/{source_id}")
     assert source_after_response.status_code == 200
 
     assert source_after_response.json() == source_before
 
     compositions_after_response = await client.get(
-        (
-            f"/api/v1/model-classes/"
-            f"{source_id}/materials"
-        )
+        (f"/api/v1/model-classes/{source_id}/materials")
     )
     assert compositions_after_response.status_code == 200
 
-    assert (
-        compositions_after_response.json()
-        == compositions_before
-    )
+    assert compositions_after_response.json() == compositions_before

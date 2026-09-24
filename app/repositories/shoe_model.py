@@ -2,9 +2,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.models.construction import ShoeConstructionMethod
 from app.models.shoe_last import ShoeLast
 from app.models.shoe_model import ShoeModel, ShoeModelClass
-from app.models.construction import ShoeConstructionMethod
 
 
 async def list_shoe_models(
@@ -21,36 +21,21 @@ async def list_shoe_models(
     statement = select(ShoeModel)
 
     if footwear_category is not None:
-        statement = statement.where(
-            ShoeModel.footwear_category == footwear_category
-        )
+        statement = statement.where(ShoeModel.footwear_category == footwear_category)
 
     if footwear_type is not None:
-        statement = statement.where(
-            ShoeModel.footwear_type == footwear_type
-        )
+        statement = statement.where(ShoeModel.footwear_type == footwear_type)
 
     if target_group is not None:
-        statement = statement.where(
-            ShoeModel.target_group == target_group
-        )
+        statement = statement.where(ShoeModel.target_group == target_group)
 
     if shoe_last_id is not None:
-        statement = statement.where(
-            ShoeModel.shoe_last_id == shoe_last_id
-        )
+        statement = statement.where(ShoeModel.shoe_last_id == shoe_last_id)
 
     if is_active is not None:
-        statement = statement.where(
-            ShoeModel.is_active == is_active
-        )
+        statement = statement.where(ShoeModel.is_active == is_active)
 
-    statement = (
-        statement
-        .order_by(ShoeModel.shoe_model_id)
-        .offset(offset)
-        .limit(limit)
-    )
+    statement = statement.order_by(ShoeModel.shoe_model_id).offset(offset).limit(limit)
 
     result = await session.execute(statement)
 
@@ -124,9 +109,7 @@ async def get_shoe_model_by_code(
     session: AsyncSession,
     model_code: str,
 ) -> ShoeModel | None:
-    statement = select(ShoeModel).where(
-        ShoeModel.model_code == model_code
-    )
+    statement = select(ShoeModel).where(ShoeModel.model_code == model_code)
     result = await session.execute(statement)
     return result.scalar_one_or_none()
 

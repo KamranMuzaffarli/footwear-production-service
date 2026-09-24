@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,12 +11,18 @@ from app.core.exceptions import (
 from app.models.shoe_model import ShoeModel
 from app.repositories.shoe_model import (
     create_shoe_model as repository_create_shoe_model,
+)
+from app.repositories.shoe_model import (
     get_shoe_last,
     get_shoe_model,
     get_shoe_model_by_code,
+)
+from app.repositories.shoe_model import (
     update_shoe_model as repository_update_shoe_model,
 )
 from app.schemas.shoe_model import ShoeModelCreate, ShoeModelUpdate
+
+logger = logging.getLogger(__name__)
 
 
 async def _validate_shoe_last(
@@ -41,10 +49,7 @@ async def _validate_model_code(
         model_code,
     )
 
-    if (
-        existing_model is not None
-        and existing_model.shoe_model_id != current_model_id
-    ):
+    if existing_model is not None and existing_model.shoe_model_id != current_model_id:
         raise ConflictError("Shoe Model code already exists")
 
 
@@ -72,12 +77,14 @@ async def create_shoe_model(
 
     except IntegrityError as exc:
         await session.rollback()
-        raise ConflictError(
-            "Shoe Model conflicts with existing data"
-        ) from exc
+        logger.warning(
+            "Shoe Model create transaction rolled back after integrity error"
+        )
+        raise ConflictError("Shoe Model conflicts with existing data") from exc
 
     except Exception:
         await session.rollback()
+        logger.exception("Shoe Model create transaction failed; changes rolled back")
         raise
 
     await session.refresh(shoe_model)
@@ -127,12 +134,14 @@ async def update_shoe_model(
 
     except IntegrityError as exc:
         await session.rollback()
-        raise ConflictError(
-            "Shoe Model conflicts with existing data"
-        ) from exc
+        logger.warning(
+            "Shoe Model update transaction rolled back after integrity error"
+        )
+        raise ConflictError("Shoe Model conflicts with existing data") from exc
 
     except Exception:
         await session.rollback()
+        logger.exception("Shoe Model update transaction failed; changes rolled back")
         raise
 
     await session.refresh(shoe_model)

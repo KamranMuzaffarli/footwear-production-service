@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean,
@@ -16,8 +17,11 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
-from app.models.shoe_last import ShoeLast
 from app.models.construction import ShoeConstructionMethod
+from app.models.shoe_last import ShoeLast
+
+if TYPE_CHECKING:
+    from app.models.material import ShoeModelClassMaterial
 
 
 class ShoeModel(Base):

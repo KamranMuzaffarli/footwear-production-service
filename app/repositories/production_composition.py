@@ -46,10 +46,7 @@ async def get_composition(
 ) -> ShoeModelClassMaterial | None:
     statement = (
         select(ShoeModelClassMaterial)
-        .where(
-            ShoeModelClassMaterial.shoe_model_class_material_id
-            == composition_id
-        )
+        .where(ShoeModelClassMaterial.shoe_model_class_material_id == composition_id)
         .options(
             selectinload(ShoeModelClassMaterial.material),
             selectinload(ShoeModelClassMaterial.usage_role),
@@ -69,11 +66,9 @@ async def get_composition_by_combination(
     material_usage_role_id: int,
 ) -> ShoeModelClassMaterial | None:
     statement = select(ShoeModelClassMaterial).where(
-        ShoeModelClassMaterial.shoe_model_class_id
-        == shoe_model_class_id,
+        ShoeModelClassMaterial.shoe_model_class_id == shoe_model_class_id,
         ShoeModelClassMaterial.material_id == material_id,
-        ShoeModelClassMaterial.material_usage_role_id
-        == material_usage_role_id,
+        ShoeModelClassMaterial.material_usage_role_id == material_usage_role_id,
     )
 
     result = await session.execute(statement)
@@ -88,17 +83,14 @@ async def list_active_compositions(
     statement = (
         select(ShoeModelClassMaterial)
         .where(
-            ShoeModelClassMaterial.shoe_model_class_id
-            == shoe_model_class_id,
+            ShoeModelClassMaterial.shoe_model_class_id == shoe_model_class_id,
             ShoeModelClassMaterial.is_active.is_(True),
         )
         .options(
             selectinload(ShoeModelClassMaterial.material),
             selectinload(ShoeModelClassMaterial.usage_role),
         )
-        .order_by(
-            ShoeModelClassMaterial.shoe_model_class_material_id
-        )
+        .order_by(ShoeModelClassMaterial.shoe_model_class_material_id)
     )
 
     result = await session.execute(statement)

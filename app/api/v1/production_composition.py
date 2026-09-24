@@ -16,7 +16,6 @@ from app.services.production_composition import (
     update_production_composition,
 )
 
-
 router = APIRouter(
     prefix="/model-classes",
     tags=["Production Composition"],

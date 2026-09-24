@@ -162,10 +162,9 @@ async def test_specification_reports_no_active_composition(
     )
 
     assert result.is_production_ready is False
-    assert [
-        issue.code
-        for issue in result.validation_issues
-    ] == ["no_active_composition"]
+    assert [issue.code for issue in result.validation_issues] == [
+        "no_active_composition"
+    ]
 
 
 @pytest.mark.parametrize(
@@ -223,10 +222,7 @@ async def test_specification_reports_inactive_entities(
     )
 
     assert result.is_production_ready is False
-    assert [
-        issue.code
-        for issue in result.validation_issues
-    ] == [expected_code]
+    assert [issue.code for issue in result.validation_issues] == [expected_code]
 
 
 async def test_specification_reports_missing_consumption_values(
@@ -245,10 +241,7 @@ async def test_specification_reports_missing_consumption_values(
 
     assert result.is_production_ready is False
 
-    assert [
-        issue.code
-        for issue in result.validation_issues
-    ] == [
+    assert [issue.code for issue in result.validation_issues] == [
         "missing_consumption_quantity",
         "missing_consumption_unit",
     ]
@@ -270,10 +263,7 @@ async def test_specification_reports_invalid_quantity_and_blank_unit(
 
     assert result.is_production_ready is False
 
-    assert [
-        issue.code
-        for issue in result.validation_issues
-    ] == [
+    assert [issue.code for issue in result.validation_issues] == [
         "invalid_consumption_quantity",
         "missing_consumption_unit",
     ]
@@ -300,10 +290,7 @@ async def test_specification_collects_multiple_validation_issues(
 
     assert result.is_production_ready is False
 
-    assert [
-        issue.code
-        for issue in result.validation_issues
-    ] == [
+    assert [issue.code for issue in result.validation_issues] == [
         "inactive_shoe_model",
         "inactive_model_class",
         "inactive_shoe_last",

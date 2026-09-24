@@ -329,7 +329,7 @@ class ShoeModelClassMaterial(Base):
     )
 
     shoe_model_class: Mapped[ShoeModelClass] = relationship(
-    back_populates="compositions",
+        back_populates="compositions",
     )
     material: Mapped[Material] = relationship(
         back_populates="compositions",

@@ -7,7 +7,6 @@ from app.api.dependencies import get_db_session
 from app.repositories.material import get_material, list_materials
 from app.schemas.material import MaterialDetailRead, MaterialRead
 
-
 router = APIRouter(prefix="/materials", tags=["Material"])
 
 DbSession = Annotated[AsyncSession, Depends(get_db_session)]

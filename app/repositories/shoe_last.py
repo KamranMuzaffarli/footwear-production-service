@@ -18,14 +18,10 @@ async def list_shoe_lasts(
         statement = statement.where(ShoeLast.last_type == last_type)
 
     if gender_category is not None:
-        statement = statement.where(
-            ShoeLast.gender_category == gender_category
-        )
+        statement = statement.where(ShoeLast.gender_category == gender_category)
 
     if size_system is not None:
-        statement = statement.where(
-            ShoeLast.size_system == size_system
-        )
+        statement = statement.where(ShoeLast.size_system == size_system)
 
     result = await session.execute(statement)
 

@@ -1,6 +1,5 @@
 from httpx import AsyncClient
 
-
 TEST_MODEL_CODE = "TEST_TASK20_ISOLATION_MODEL"
 
 
@@ -21,9 +20,7 @@ async def test_shoe_lasts_smoke(
 async def test_01_committed_change_exists_inside_test(
     client: AsyncClient,
 ) -> None:
-    shoe_lasts_response = await client.get(
-        "/api/v1/shoe-lasts"
-    )
+    shoe_lasts_response = await client.get("/api/v1/shoe-lasts")
     assert shoe_lasts_response.status_code == 200
 
     shoe_last = shoe_lasts_response.json()[0]
@@ -48,9 +45,7 @@ async def test_01_committed_change_exists_inside_test(
 
     assert created_model["model_code"] == TEST_MODEL_CODE
 
-    read_response = await client.get(
-        f"/api/v1/models/{created_model['shoe_model_id']}"
-    )
+    read_response = await client.get(f"/api/v1/models/{created_model['shoe_model_id']}")
 
     assert read_response.status_code == 200
     assert read_response.json()["model_code"] == TEST_MODEL_CODE
@@ -65,7 +60,4 @@ async def test_02_committed_change_was_rolled_back(
 
     models = response.json()
 
-    assert all(
-        model["model_code"] != TEST_MODEL_CODE
-        for model in models
-    )
+    assert all(model["model_code"] != TEST_MODEL_CODE for model in models)

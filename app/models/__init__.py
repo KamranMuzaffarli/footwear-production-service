@@ -9,3 +9,17 @@ from app.models.material import (
 )
 from app.models.shoe_last import ShoeLast, ShoeLastSize
 from app.models.shoe_model import ShoeModel, ShoeModelClass
+
+__all__ = [
+    "Material",
+    "MaterialAttribute",
+    "MaterialAttributeValue",
+    "MaterialCategory",
+    "MaterialUsageRole",
+    "ShoeConstructionMethod",
+    "ShoeLast",
+    "ShoeLastSize",
+    "ShoeModel",
+    "ShoeModelClass",
+    "ShoeModelClassMaterial",
+]

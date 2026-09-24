@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,19 +11,27 @@ from app.core.exceptions import (
 from app.models.material import ShoeModelClassMaterial
 from app.repositories.production_composition import (
     create_composition as repository_create_composition,
+)
+from app.repositories.production_composition import (
     deactivate_composition as repository_deactivate_composition,
+)
+from app.repositories.production_composition import (
     get_composition,
     get_composition_by_combination,
     get_material,
     get_model_class,
     get_usage_role,
     list_active_compositions,
+)
+from app.repositories.production_composition import (
     update_composition as repository_update_composition,
 )
 from app.schemas.production_composition import (
     ProductionCompositionCreate,
     ProductionCompositionUpdate,
 )
+
+logger = logging.getLogger(__name__)
 
 
 async def _validate_model_class(
@@ -79,10 +89,7 @@ async def _get_owned_composition(
         composition_id,
     )
 
-    if (
-        composition is None
-        or composition.shoe_model_class_id != shoe_model_class_id
-    ):
+    if composition is None or composition.shoe_model_class_id != shoe_model_class_id:
         raise EntityNotFoundError("Production Composition not found")
 
     return composition
@@ -131,9 +138,7 @@ async def create_production_composition(
     )
 
     if existing_composition is not None and existing_composition.is_active:
-        raise ConflictError(
-            "Production Composition already exists"
-        )
+        raise ConflictError("Production Composition already exists")
 
     try:
         if existing_composition is not None:
@@ -163,12 +168,19 @@ async def create_production_composition(
 
     except IntegrityError as exc:
         await session.rollback()
+        logger.warning(
+            "Production Composition create transaction rolled back "
+            "after integrity error"
+        )
         raise ConflictError(
             "Production Composition conflicts with existing data"
         ) from exc
 
     except Exception:
         await session.rollback()
+        logger.exception(
+            "Production Composition create transaction failed; changes rolled back"
+        )
         raise
 
     reloaded_composition = await get_composition(
@@ -214,12 +226,19 @@ async def update_production_composition(
 
     except IntegrityError as exc:
         await session.rollback()
+        logger.warning(
+            "Production Composition update transaction rolled back "
+            "after integrity error"
+        )
         raise ConflictError(
             "Production Composition conflicts with existing data"
         ) from exc
 
     except Exception:
         await session.rollback()
+        logger.exception(
+            "Production Composition update transaction failed; changes rolled back"
+        )
         raise
 
     reloaded_composition = await get_composition(
@@ -258,4 +277,8 @@ async def deactivate_production_composition(
 
     except Exception:
         await session.rollback()
+        logger.exception(
+            "Production Composition deactivation transaction failed; "
+            "changes rolled back"
+        )
         raise
