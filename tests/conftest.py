@@ -78,3 +78,123 @@ async def client(
             yield http_client
     finally:
         app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def active_shoe_last(
+    client: AsyncClient,
+) -> dict:
+    response = await client.get("/api/v1/shoe-lasts")
+    assert response.status_code == 200
+
+    return next(
+        shoe_last
+        for shoe_last in response.json()
+        if shoe_last["is_active"]
+    )
+
+
+@pytest_asyncio.fixture
+async def active_construction_method(
+    client: AsyncClient,
+) -> dict:
+    response = await client.get(
+        "/api/v1/construction-methods"
+    )
+    assert response.status_code == 200
+
+    return next(
+        method
+        for method in response.json()
+        if method["is_active"]
+    )
+
+
+@pytest_asyncio.fixture
+async def active_material(
+    client: AsyncClient,
+) -> dict:
+    response = await client.get(
+        "/api/v1/materials",
+        params={
+            "limit": 100,
+            "is_active": True,
+        },
+    )
+    assert response.status_code == 200
+
+    materials = response.json()
+    assert materials
+
+    return materials[0]
+
+
+@pytest_asyncio.fixture
+async def active_usage_role(
+    client: AsyncClient,
+) -> dict:
+    response = await client.get(
+        "/api/v1/material-usage-roles"
+    )
+    assert response.status_code == 200
+
+    return next(
+        role
+        for role in response.json()
+        if role["is_active"]
+    )
+
+
+@pytest_asyncio.fixture
+async def test_shoe_model(
+    client: AsyncClient,
+    active_shoe_last: dict,
+) -> dict:
+    response = await client.post(
+        "/api/v1/models",
+        json={
+            "shoe_last_id": active_shoe_last["shoe_last_id"],
+            "model_code": "TEST_INTEGRATION_MODEL",
+            "model_name": "Integration Test Model",
+            "footwear_category": "test",
+            "footwear_type": "test",
+            "target_group": "test",
+            "description": "Integration test Shoe Model",
+            "is_active": True,
+        },
+    )
+
+    assert response.status_code == 201
+
+    return response.json()
+
+
+@pytest_asyncio.fixture
+async def test_model_class(
+    client: AsyncClient,
+    test_shoe_model: dict,
+    active_construction_method: dict,
+) -> dict:
+    response = await client.post(
+        (
+            f"/api/v1/models/"
+            f"{test_shoe_model['shoe_model_id']}/classes"
+        ),
+        json={
+            "class_code": "TEST_INTEGRATION_CLASS",
+            "class_name": "Integration Test Class",
+            "construction_method_id": (
+                active_construction_method[
+                    "construction_method_id"
+                ]
+            ),
+            "quality_level": "test",
+            "warranty_months": 12,
+            "description": "Integration test Model Class",
+            "is_active": True,
+        },
+    )
+
+    assert response.status_code == 201
+
+    return response.json()
