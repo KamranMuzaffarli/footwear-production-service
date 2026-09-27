@@ -7,7 +7,7 @@ dependencies = [
     "uvicorn",
     "pydantic-settings",
     "pydantic",
-    "sqlalchemy>=2.0,<3.0",
+    "sqlalchemy[asyncio]>=2.0,<3.0",
     "asyncpg",
 ]
 
