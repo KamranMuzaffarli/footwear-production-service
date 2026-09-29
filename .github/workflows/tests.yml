@@ -36,6 +36,16 @@ jobs:
       - name: Checkout backend
         uses: actions/checkout@v7
 
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ".[test,dev]"
+
       - name: Checkout FootwearProductionCore
         uses: actions/checkout@v7
         with:
@@ -103,16 +113,6 @@ jobs:
             -At \
             -c "SELECT to_regclass('public.shoe_models') IS NOT NULL;" \
             | grep -qx "t"
-
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-
-      - name: Install project
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install ".[test,dev]"
 
       - name: Ruff check
         run: ruff check app tests
