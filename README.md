@@ -558,6 +558,25 @@ DDL
 → seed data
 ```
 
+For example, on PowerShell, with both repositories in neighboring directories and a local PostgreSQL administrative user named `postgres`:
+
+```powershell
+$core = "..\footwear-production-core"
+$pgUser = "postgres"
+$database = "footwear_production_core"
+
+psql -U $pgUser -d postgres -W -v ON_ERROR_STOP=1 `
+    -c "CREATE DATABASE $database;"
+
+psql -U $pgUser -d $database -W -v ON_ERROR_STOP=1 `
+    -f "$core\database\ddl\01_reference_tables.sql" `
+    -f "$core\database\schema_migrations\001_update_shoe_models_classification_fields.sql" `
+    -f "$core\database\data_migrations\001_add_padding_material_category.sql" `
+    -f "$core\database\dml\01_seed_data.sql"
+```
+
+Use a different database name if required by your local environment. Do not run the Core demo-query script as part of application database initialization.
+
 Then enter the backend repository:
 
 ```bash
@@ -687,6 +706,8 @@ docker compose down -v
 ## Running Tests
 
 Tests require a dedicated PostgreSQL database initialized from FootwearProductionCore.
+
+Use the same Core initialization procedure shown in the Local Python Setup section, but create and initialize a separate database for `TEST_DATABASE_URL`.
 
 Set:
 
